@@ -1,7 +1,8 @@
 import requests
+import pandas as pd
 
-# Given GitHub API token and base URL
-TOKEN = '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'  # Make sure to keep this token secure
+# GitHub API token and base URL
+TOKEN = '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'
 BASE_URL = 'https://api.github.com'
 
 # Define headers for authentication
@@ -25,14 +26,14 @@ def fetch_users():
     for user in users_data:
         users.append({
             'login': user.get('login', ''),
-            'followers': user.get('followers', 0),
-            'name': user.get('name', ''),
+            'name': user.get('name', '') or '',
             'company': user.get('company', '').strip('@').strip().upper() if user.get('company') else '',
-            'location': user.get('location', ''),
-            'email': user.get('email', ''),
+            'location': user.get('location', '') or '',
+            'email': user.get('email', '') or '',
             'hireable': user.get('hireable', '') if user.get('hireable') is not None else '',
-            'bio': user.get('bio', ''),
+            'bio': user.get('bio', '') or '',
             'public_repos': user.get('public_repos', 0),
+            'followers': user.get('followers', 0),
             'following': user.get('following', 0),
             'created_at': user.get('created_at', '')
         })
