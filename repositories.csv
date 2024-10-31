@@ -1,18 +1,2 @@
-def fetch_and_save_repositories(users, filename="repositories.csv"):
-    with open(filename, mode="w", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerow(["login", "full_name", "created_at", "stargazers_count", "watchers_count", "language", "has_projects", "has_wiki", "license_name"])
-        for user in users:
-            repos_url = f"{BASE_URL}/users/{user['login']}/repos?per_page=500"
-            repos = requests.get(repos_url, headers=HEADERS).json()
-            for repo in repos:
-                license_name = repo["license"]["key"] if repo.get("license") else ""
-
-writer.writerow([
-                    user["login"], repo["full_name"], repo["created_at"], repo["stargazers_count"],
-                    repo["watchers_count"], repo["language"], repo["has_projects"], repo["has_wiki"],
-                    license_name
-                ])
-
 
 
