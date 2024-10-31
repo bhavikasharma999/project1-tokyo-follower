@@ -1,20 +1,29 @@
 import requests
 import csv
-from IPython.display import display
-from google.colab import files
+import os
+from google.colab import files  # Use `from IPython.display import files` if using Jupyter Notebook locally
 
-# Replace with your GitHub Token or use an environment variable.
-GITHUB_TOKEN = "Token_code"  # Replace "Token_code" with your actual token.
-HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"}
+# GitHub API Token and Base URL
+TOKEN = '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'  # Make sure to keep this token secure
+BASE_URL = 'https://api.github.com'
+HEADERS = {"Authorization": f"token {TOKEN}"}
+
+# Directory for saving files
+SAVE_DIR = 'project1-tokyo-follower'
+
+# Create directory if it doesn't exist
+if not os.path.exists(SAVE_DIR):
+    os.makedirs(SAVE_DIR)
 
 def get_users_in_tokyo():
+    """Fetches GitHub users located in Tokyo with over 200 followers."""
     users = []
     query = "location:Tokyo+followers:>200"
     page = 1
     per_page = 100
 
     while True:
-        url = f"https://api.github.com/search/users?q={query}&per_page={per_page}&page={page}"
+        url = f"{BASE_URL}/search/users?q={query}&per_page={per_page}&page={page}"
         response = requests.get(url, headers=HEADERS)
         print(f"Fetching page {page}...")
 
@@ -38,7 +47,8 @@ def get_users_in_tokyo():
     return detailed_users
 
 def get_user_details(username):
-    user_url = f"https://api.github.com/users/{username}"
+    """Fetches detailed information for a specific GitHub user."""
+    user_url = f"{BASE_URL}/users/{username}"
     user_data = requests.get(user_url, headers=HEADERS).json()
 
     return {
@@ -56,6 +66,7 @@ def get_user_details(username):
     }
 
 def clean_company_name(company):
+    """Cleans up and formats the company name."""
     if company:
         company = company.strip().upper()
         if company.startswith('@'):
@@ -63,7 +74,8 @@ def clean_company_name(company):
     return company
 
 def get_user_repos(username):
-    repos_url = f"https://api.github.com/users/{username}/repos?per_page=500"
+    """Fetches repository information for a specific GitHub user."""
+    repos_url = f"{BASE_URL}/users/{username}/repos?per_page=100"
     response = requests.get(repos_url, headers=HEADERS)
     repos_data = response.json()
 
@@ -84,21 +96,25 @@ def get_user_repos(username):
     return repos
 
 def save_users_to_csv(users):
-    with open('users.csv', mode='w', newline='') as file:
+    """Saves user data to a CSV file."""
+    file_path = os.path.join(SAVE_DIR, 'users.csv')
+    with open(file_path, mode='w', newline='') as file:
         writer = csv.DictWriter(file, fieldnames=['login', 'name', 'company', 'location', 'email', 'hireable', 'bio', 'public_repos', 'followers', 'following', 'created_at'])
         writer.writeheader()
         writer.writerows(users)
-    print("Saved user data to users.csv")
+    print(f"Saved user data to {file_path}")
 
 def save_repos_to_csv(repos):
-    with open('repositories.csv', mode='w', newline='') as file:
+    """Saves repository data to a CSV file."""
+    file_path = os.path.join(SAVE_DIR, 'repositories.csv')
+    with open(file_path, mode='w', newline='') as file:
         writer = csv.DictWriter(file, fieldnames=['login', 'full_name', 'created_at', 'stargazers_count', 'watchers_count', 'language', 'has_projects', 'has_wiki', 'license_name'])
         writer.writeheader()
         writer.writerows(repos)
-    print("Saved repository data to repositories.csv")
+    print(f"Saved repository data to {file_path}")
 
 if __name__ == "__main__":
-    # Fetch user data
+    # Fetch users in Tokyo with more than 200 followers
     users = get_users_in_tokyo()
     save_users_to_csv(users)
 
@@ -109,8 +125,8 @@ if __name__ == "__main__":
         all_repos.extend(repos)
     save_repos_to_csv(all_repos)
 
-    # Download the files
-    files.download('users.csv')
-    files.download('repositories.csv')
+    # Download the files (works for Google Colab; replace with local Jupyter download if needed)
+    files.download(os.path.join(SAVE_DIR, 'users.csv'))
+    files.download(os.path.join(SAVE_DIR, 'repositories.csv'))
 
     print("Data fetching and file download completed.")
