@@ -1,8 +1,8 @@
+import os
 import requests
-import pandas as pd
 
-# GitHub API token and base URL
-TOKEN = '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'
+# Fetch the GitHub API token from an environment variable
+TOKEN = os.getenv('GITHUB_TOKEN')  # Ensure this environment variable is securely set
 BASE_URL = 'https://api.github.com'
 
 # Define headers for authentication
@@ -12,7 +12,9 @@ headers = {
 
 # Fetch users in Tokyo with over 200 followers
 def fetch_users():
-    url = f'{BASE_URL}/search/users?q=location:Tokyo+followers:>200'
+    query = "location:Tokyo+followers:>200"
+    url = f"{BASE_URL}/search/users?q={query}"
+    
     response = requests.get(url, headers=headers)
     
     # Check if the request was successful
@@ -26,14 +28,14 @@ def fetch_users():
     for user in users_data:
         users.append({
             'login': user.get('login', ''),
-            'name': user.get('name', '') or '',
-            'company': user.get('company', '').strip('@').strip().upper() if user.get('company') else '',
-            'location': user.get('location', '') or '',
-            'email': user.get('email', '') or '',
-            'hireable': user.get('hireable', '') if user.get('hireable') is not None else '',
-            'bio': user.get('bio', '') or '',
-            'public_repos': user.get('public_repos', 0),
             'followers': user.get('followers', 0),
+            'name': user.get('name', ''),
+            'company': user.get('company', '').strip('@').strip().upper() if user.get('company') else '',
+            'location': user.get('location', ''),
+            'email': user.get('email', ''),
+            'hireable': user.get('hireable', '') if user.get('hireable') is not None else '',
+            'bio': user.get('bio', ''),
+            'public_repos': user.get('public_repos', 0),
             'following': user.get('following', 0),
             'created_at': user.get('created_at', '')
         })
